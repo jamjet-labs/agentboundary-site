@@ -1,0 +1,17 @@
+---
+import SpecLayout from "../layouts/SpecLayout.astro";
+import { getEntry, render } from "astro:content";
+
+const entry = await getEntry("spec", "threat-model");
+if (!entry) {
+  throw new Error("spec/threat-model.md missing — run `node scripts/sync-spec.mjs` before build.");
+}
+const { Content } = await render(entry);
+---
+<SpecLayout
+  title="AgentBoundary threat model"
+  description="Nine adversarial threats against agent-initiated production actions, mapped to AgentBoundary mitigations and conformance levels."
+  ogImage="/og/threat-model.png"
+>
+  <Content />
+</SpecLayout>

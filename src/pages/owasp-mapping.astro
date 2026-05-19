@@ -1,0 +1,17 @@
+---
+import SpecLayout from "../layouts/SpecLayout.astro";
+import { getEntry, render } from "astro:content";
+
+const entry = await getEntry("spec", "owasp-mapping");
+if (!entry) {
+  throw new Error("spec/owasp-mapping.md missing — run `node scripts/sync-spec.mjs` before build.");
+}
+const { Content } = await render(entry);
+---
+<SpecLayout
+  title="OWASP LLM Top 10 — AgentBoundary mapping"
+  description="OWASP LLM Top 10 risks mapped onto AgentBoundary conformance levels."
+  ogImage="/og/owasp-mapping.png"
+>
+  <Content />
+</SpecLayout>

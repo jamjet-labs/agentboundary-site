@@ -1,0 +1,68 @@
+name: Verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout site
+        uses: actions/checkout@v4
+
+      - name: Checkout spec at pinned ref
+        uses: actions/checkout@v4
+        with:
+          repository: jamjet-labs/agentboundary
+          ref: v0.1.0
+          path: agentboundary
+
+      - name: Move spec sibling
+        run: |
+          # Site expects ../agentboundary; restructure to match.
+          mkdir -p ../agentboundary
+          rsync -a agentboundary/ ../agentboundary/
+          rm -rf agentboundary
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Sync spec + verify schema identity
+        run: pnpm prebuild
+
+      - name: Build
+        run: pnpm build
+
+      - name: Confirm schema served byte-identical
+        run: |
+          diff dist/schemas/action-receipt-v0.1.json ../agentboundary/docs/schemas/action-receipt-v0.1.json
+          echo "schema byte-identical OK"
+
+      - name: Confirm hero pages render
+        run: |
+          for path in index.html spec/v0.1/index.html threat-model/index.html owasp-mapping/index.html 404.html; do
+            test -s "dist/$path" || { echo "missing $path"; exit 1; }
+          done
+          echo "all hero+spec pages rendered"
+
+      - name: Confirm $id host
+        run: |
+          jq -r '.["$id"]' dist/schemas/action-receipt-v0.1.json | tee /tmp/sid
+          grep -q "agentboundary.jamjet.dev" /tmp/sid

@@ -1,0 +1,559 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const receipt = {
+  version: "agentboundary/v0.1",
+  receipt_id: "0192c8d0-1f2a-7c3e-bf2a-1a4d3f5e6c7b",
+  issued_at: "2026-06-15T14:23:08Z",
+  actor: { type: "agent", id: "agent:claude-code:session/789abc", display_name: "Claude Code" },
+  agent: { framework: "claude-code", framework_version: "2.4.1", model: "claude-opus-4-7" },
+  tool: { name: "github-mcp", version: "0.7.0", capability: "github.merge" },
+  target: { system: "github.com/jamjet-labs/agentboundary", environment: "prod", resource_id: "pull/14" },
+  arguments_hash: "9698adaf2dca5f26a4f9644a8d0f4f34b5558bce09961f94e810fe3aaa9071aa",
+  policy: { name: "agentboundary.repo.merges", version: "2", decision: "allow" },
+  execution: { status: "success", completed_at: "2026-06-15T14:23:09Z", result_ref: "sha:b1c2d3e4f5a6" },
+  receipt_hash: "4d905d5dbc9faa4dafcb2155da9c4d5e1052cb23c680f3754d4ebc5800a4bae7",
+};
+
+const receiptJson = JSON.stringify(receipt, null, 2);
+---
+<BaseLayout
+  title="AgentBoundary — Prove every agent action."
+  description="An open spec and conformance suite for proving AI-initiated production actions. 10 scenarios, 60 seconds, no signup."
+>
+  <main class="ab-hero">
+    <div class="ab-conic" aria-hidden="true"></div>
+    <div class="ab-grid"  aria-hidden="true"></div>
+
+    <header class="ab-masthead">
+      <a href="/" class="ab-eyebrow">Action Receipt / github.merge / prod</a>
+      <nav class="ab-nav">
+        <a href="/spec/v0.1">Spec</a>
+        <a href="/threat-model">Threat model</a>
+        <a href="/owasp-mapping">OWASP</a>
+        <a href="https://github.com/jamjet-labs/agentboundary">GitHub ↗</a>
+      </nav>
+    </header>
+
+    <section class="ab-wrap">
+      <div class="ab-copy">
+        <p class="ab-tag">AgentBoundary · v0.1 · open spec</p>
+        <h1 class="ab-h1">Prove every agent action.</h1>
+        <p class="ab-lede">
+          An open specification, in the spirit of OAuth and WebAuthn, for the document
+          that should follow every AI-initiated production action.
+        </p>
+        <p class="ab-sub">
+          Portable. Tamper-evident. Verifiable by any party &mdash; auditor, regulator,
+          insurer &mdash; without trusting the agent framework or the model provider.
+        </p>
+
+        <div class="ab-cta" role="button" tabindex="0" aria-label="Copy install command">
+          <span class="ab-cmd-prompt">$</span>
+          <code id="ab-cmd-text">npx agentboundary run scenarios/</code>
+          <button class="ab-copy-btn" type="button" aria-label="Copy to clipboard">copy</button>
+        </div>
+        <p class="ab-cmd-foot">
+          <span class="ab-cmd-tag">10 scenarios</span>
+          <span class="ab-cmd-tag">60 seconds</span>
+          <span class="ab-cmd-tag">no signup</span>
+        </p>
+
+        <p class="ab-route-foot">
+          Read the spec →
+          <a href="/spec/v0.1">v0.1</a>
+          <span class="ab-route-sep">·</span>
+          <a href="/threat-model">threat model</a>
+          <span class="ab-route-sep">·</span>
+          <a href="/owasp-mapping">OWASP LLM Top 10</a>
+        </p>
+      </div>
+
+      <div class="ab-reactor">
+        <span class="ab-ring" aria-hidden="true"></span>
+        <span class="ab-ring-2" aria-hidden="true"></span>
+        <article class="ab-receipt-card">
+          <header class="ab-receipt-head">
+            <span class="ab-dot"></span>
+            <span class="ab-dot ab-dot-2"></span>
+            <span class="ab-dot ab-dot-3"></span>
+            <span class="ab-receipt-label">action_receipt.json</span>
+            <span class="ab-receipt-pill">ALLOW</span>
+          </header>
+          <pre class="ab-receipt" aria-label="Example Action Receipt"><code id="ab-receipt-code">{receiptJson}</code></pre>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <section class="ab-explain">
+    <div class="ab-explain-inner">
+      <h2>What an Action Receipt proves</h2>
+      <div class="ab-explain-grid">
+        <article>
+          <span class="ab-explain-num">01</span>
+          <h3>Who acted</h3>
+          <p>The actor (human, agent, service), the agent's framework and model, and the tool capability that was invoked.</p>
+        </article>
+        <article>
+          <span class="ab-explain-num">02</span>
+          <h3>What they could do</h3>
+          <p>The policy decision — <code>allow</code>, <code>require-approval</code>, <code>deny</code>, or <code>escalate</code> — bound to a named, versioned policy.</p>
+        </article>
+        <article>
+          <span class="ab-explain-num">03</span>
+          <h3>With which arguments</h3>
+          <p><code>arguments_hash</code> is the canonical SHA-256 of the inputs the agent ran the tool with. Mutate any byte after the policy decision and the chain breaks.</p>
+        </article>
+        <article>
+          <span class="ab-explain-num">04</span>
+          <h3>To what effect</h3>
+          <p>Execution status, result reference, then <code>receipt_hash</code> — the canonical SHA-256 of the whole document. Any tamper invalidates it.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="ab-explain ab-explain-alt">
+    <div class="ab-explain-inner">
+      <h2>Run the conformance suite</h2>
+      <p class="ab-explain-lede">
+        Ten deterministic scenarios. Each one is named for the failure it prevents.
+        The runner emits an Action Receipt for every scenario, validates it against
+        the v0.1 schema, and grades it at Levels 1, 2, and 3.
+      </p>
+      <pre class="ab-pre"><code><span class="ab-pre-prompt">$</span> npx agentboundary run scenarios/
+
+  <span class="ab-pre-pass">PASS</span>  01-merge-allow                               1ms
+  <span class="ab-pre-pass">PASS</span>  02-mutation-require-approval                 0ms
+  <span class="ab-pre-pass">PASS</span>  03-refund-under-limit                        0ms
+  <span class="ab-pre-pass">PASS</span>  04-merge-deny                                0ms
+  <span class="ab-pre-pass">PASS</span>  05-refund-escalate                           0ms
+  <span class="ab-pre-pass">PASS</span>  06-missing-policy-block                      0ms
+  <span class="ab-pre-pass">PASS</span>  07-bad-timestamp-format                      0ms
+  <span class="ab-pre-pass">PASS</span>  08-arguments-hash-mismatch                   0ms
+  <span class="ab-pre-pass">PASS</span>  09-receipt-hash-mismatch                     0ms
+  <span class="ab-pre-pass">PASS</span>  10-claim-level-3-without-hash                0ms
+
+  <span class="ab-pre-summary">10 passed</span> · 0 failed · 1ms total</code></pre>
+      <p class="ab-explain-foot">
+        Source: <a href="https://github.com/jamjet-labs/agentboundary">jamjet-labs/agentboundary</a> · Apache 2.0 · Implementations welcome.
+      </p>
+    </div>
+  </section>
+
+  <style is:global>
+    /* ============ HERO BACKGROUND ============ */
+    .ab-hero {
+      position: relative;
+      min-height: 100vh;
+      padding: 24px clamp(20px, 4vw, 48px) 96px;
+      overflow: hidden;
+      isolation: isolate;
+      background:
+        radial-gradient(circle at 18% 16%, rgba(255, 43, 214, 0.45), transparent 30%),
+        radial-gradient(circle at 88% 14%, rgba(0, 245, 255, 0.45), transparent 28%),
+        radial-gradient(circle at 55% 86%, rgba(215, 255, 49, 0.30), transparent 32%),
+        linear-gradient(135deg, #070812, #15102d 52%, #051c24);
+    }
+    .ab-conic {
+      position: absolute;
+      inset: -25%;
+      z-index: -2;
+      background: conic-gradient(from 0deg,
+        var(--magenta), var(--cyan), var(--acid), var(--violet), var(--magenta));
+      filter: blur(80px);
+      opacity: 0.42;
+      animation: ab-spin 22s linear infinite;
+      will-change: transform;
+    }
+    .ab-grid {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-size: 38px 38px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 45%, black 30%, transparent 80%);
+    }
+    @keyframes ab-spin { to { transform: rotate(1turn); } }
+
+    /* ============ MASTHEAD ============ */
+    .ab-masthead {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .ab-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--acid);
+      text-decoration: none;
+    }
+    .ab-nav { display: flex; gap: 22px; font-family: var(--font-mono); font-size: 14px; }
+    .ab-nav a { color: var(--fg-muted); text-decoration: none; }
+    .ab-nav a:hover { color: var(--fg); }
+
+    /* ============ HERO COLUMNS ============ */
+    .ab-wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 56px auto 0;
+      display: grid;
+      gap: 56px;
+      grid-template-columns: 1fr;
+      align-items: center;
+    }
+    @media (min-width: 960px) {
+      .ab-wrap { grid-template-columns: 0.95fr 1.05fr; gap: 48px; }
+    }
+
+    .ab-tag {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--magenta);
+      margin: 0 0 12px;
+    }
+    .ab-h1 {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 9vw, 6.6rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 0.93;
+      margin: 0 0 20px;
+      text-wrap: balance;
+      background: linear-gradient(180deg, var(--paper) 0%, var(--paper) 55%, var(--cyan) 130%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .ab-lede {
+      font-size: clamp(1.1rem, 1.4vw, 1.35rem);
+      color: var(--paper);
+      margin: 0 0 14px;
+      max-width: 56ch;
+    }
+    .ab-sub {
+      font-size: 1.05rem;
+      color: var(--fg-muted);
+      margin: 0 0 28px;
+      max-width: 56ch;
+    }
+
+    /* ============ CTA ============ */
+    .ab-cta {
+      display: inline-grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 14px 14px 18px;
+      background: var(--bg-elev);
+      border: 2px solid var(--acid);
+      box-shadow:
+        0 0 0 6px rgba(215, 255, 49, 0.12),
+        10px 10px 0 var(--magenta);
+      transform: rotate(-1deg);
+      cursor: pointer;
+      font-family: var(--font-mono);
+      max-width: 100%;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .ab-cta:hover, .ab-cta:focus-visible {
+      transform: rotate(-1deg) translate(-2px, -2px);
+      box-shadow:
+        0 0 0 6px rgba(215, 255, 49, 0.20),
+        14px 14px 0 var(--magenta);
+      outline: none;
+    }
+    .ab-cmd-prompt { color: var(--magenta); font-weight: 600; font-size: 16px; }
+    .ab-cta code {
+      font-family: var(--font-mono);
+      font-size: clamp(13px, 3vw, 16px);
+      color: var(--acid);
+      white-space: normal;
+    }
+    .ab-copy-btn {
+      border: 0;
+      background: var(--acid);
+      color: var(--bg);
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .ab-copy-btn:active { transform: translateY(1px); }
+    .ab-copy-btn.copied { background: var(--cyan); }
+
+    .ab-cmd-foot {
+      display: flex;
+      gap: 8px;
+      margin: 16px 0 0;
+      flex-wrap: wrap;
+    }
+    .ab-cmd-tag {
+      display: inline-block;
+      padding: 4px 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--fg-muted);
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+    }
+
+    .ab-route-foot {
+      margin: 28px 0 0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--fg-muted);
+    }
+    .ab-route-foot a { color: var(--cyan); margin: 0 4px; }
+    .ab-route-sep { color: var(--rule); }
+
+    /* ============ RECEIPT REACTOR ============ */
+    .ab-reactor {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 460px;
+    }
+    .ab-ring,
+    .ab-ring-2 {
+      position: absolute;
+      border-radius: 50%;
+      aspect-ratio: 1;
+      pointer-events: none;
+    }
+    .ab-ring {
+      width: min(82vw, 560px);
+      background: conic-gradient(from 90deg,
+        var(--cyan), transparent 19%,
+        var(--magenta), transparent 48%,
+        var(--acid), transparent 78%,
+        var(--cyan));
+      filter: drop-shadow(0 0 32px rgba(0, 245, 255, 0.5));
+      animation: ab-pulse 4.5s ease-in-out infinite;
+      opacity: 0.85;
+    }
+    .ab-ring-2 {
+      width: min(60vw, 360px);
+      border: 1px dashed rgba(248, 251, 255, 0.32);
+    }
+    .ab-ring:before {
+      content: "";
+      position: absolute;
+      inset: 9%;
+      border-radius: 50%;
+      border: 2px dashed rgba(248, 251, 255, 0.40);
+    }
+    .ab-ring:after {
+      content: "";
+      position: absolute;
+      inset: 22%;
+      border-radius: 50%;
+      border: 2px solid rgba(215, 255, 49, 0.55);
+    }
+    @keyframes ab-pulse {
+      50% { transform: scale(1.05); filter: drop-shadow(0 0 50px rgba(255, 43, 214, 0.6)); }
+    }
+
+    .ab-receipt-card {
+      position: relative;
+      width: min(100%, 540px);
+      max-height: 580px;
+      border: 1px solid rgba(248, 251, 255, 0.22);
+      background: var(--bg-card);
+      backdrop-filter: blur(14px) saturate(1.2);
+      -webkit-backdrop-filter: blur(14px) saturate(1.2);
+      box-shadow:
+        0 22px 80px rgba(0, 0, 0, 0.55),
+        0 0 44px rgba(0, 245, 255, 0.25);
+      transform: rotate(1.5deg);
+      overflow: hidden;
+    }
+    .ab-receipt-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--rule);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--cyan);
+    }
+    .ab-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--magenta); }
+    .ab-dot-2 { background: var(--acid); }
+    .ab-dot-3 { background: var(--cyan); }
+    .ab-receipt-label { margin-left: 6px; color: var(--fg-muted); }
+    .ab-receipt-pill {
+      margin-left: auto;
+      padding: 4px 8px;
+      background: var(--acid);
+      color: var(--bg);
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+    }
+    .ab-receipt {
+      margin: 0;
+      padding: 16px 18px;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: var(--paper);
+      overflow-x: auto;
+      max-height: 520px;
+    }
+    .tk-key   { color: var(--cyan); }
+    .tk-str   { color: var(--paper); }
+    .tk-hash  { color: var(--acid); }
+    .tk-hash-final { color: var(--magenta); font-weight: 600; }
+    .tk-punct { color: var(--fg-muted); }
+    .tk-num   { color: var(--acid); }
+
+    /* ============ EXPLAIN SECTIONS ============ */
+    .ab-explain {
+      padding: 96px clamp(20px, 4vw, 48px);
+      border-top: 1px solid var(--rule);
+    }
+    .ab-explain-inner { max-width: 1100px; margin: 0 auto; }
+    .ab-explain h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin: 0 0 32px;
+      max-width: 22ch;
+    }
+    .ab-explain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 28px;
+    }
+    .ab-explain-grid article {
+      padding: 22px;
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+      background: rgba(11, 16, 32, 0.4);
+    }
+    .ab-explain-num {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--magenta);
+      margin-bottom: 8px;
+    }
+    .ab-explain-grid h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      margin: 0 0 8px;
+    }
+    .ab-explain-grid p { margin: 0; color: var(--fg-muted); }
+    .ab-explain-grid code { color: var(--cyan); }
+    .ab-explain-alt { background: rgba(11, 16, 32, 0.4); }
+    .ab-explain-lede { max-width: 64ch; color: var(--fg-muted); margin: 0 0 24px; }
+    .ab-explain-foot { margin: 24px 0 0; color: var(--fg-muted); font-size: 14px; }
+    .ab-pre {
+      padding: 22px;
+      font-size: 13px;
+      line-height: 1.65;
+      background: rgba(7, 8, 18, 0.7);
+    }
+    .ab-pre-prompt { color: var(--magenta); }
+    .ab-pre-pass { color: var(--acid); font-weight: 600; }
+    .ab-pre-summary { color: var(--cyan); font-weight: 600; }
+
+    /* ============ MOBILE ============ */
+    @media (max-width: 640px) {
+      .ab-hero { padding-top: 16px; padding-bottom: 64px; }
+      .ab-h1   { font-size: clamp(2.6rem, 13vw, 4rem); }
+      .ab-receipt { font-size: 11.5px; padding: 12px 14px; }
+      .ab-cta  { transform: rotate(-0.6deg); padding: 12px 12px 12px 14px; box-shadow: 0 0 0 4px rgba(215,255,49,0.12), 6px 6px 0 var(--magenta); }
+      .ab-receipt-card { transform: rotate(0.6deg); }
+      .ab-reactor { min-height: 380px; margin-top: 24px; }
+      .ab-explain { padding: 64px 20px; }
+    }
+  </style>
+
+  <script is:inline define:vars={{ receiptJson }}>
+    // Syntax-highlight + hash scramble micro-animation.
+    const code = document.getElementById("ab-receipt-code");
+    if (code) {
+      const FINAL_HASH = "4d905d5dbc9faa4dafcb2155da9c4d5e1052cb23c680f3754d4ebc5800a4bae7";
+      const html = receiptJson
+        .replace(/("[a-z_]+")(?=\s*:)/g, '<span class="tk-key">$1</span>')
+        .replace(/: "([a-f0-9]{40,})"/g, (_m, h) => {
+          const cls = h === FINAL_HASH ? "tk-hash-final" : "tk-hash";
+          return ': "<span class="' + cls + '" data-hash="' + h + '">' + h + '</span>"';
+        })
+        .replace(/: "([^"]*)"/g, ': "<span class="tk-str">$1</span>"')
+        .replace(/: (\d+)/g, ': <span class="tk-num">$1</span>')
+        .replace(/([\{\}\[\],])/g, '<span class="tk-punct">$1</span>');
+      code.innerHTML = html;
+
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!reduce) {
+        const hashEl = code.querySelector(".tk-hash-final");
+        if (hashEl) {
+          const HEX = "0123456789abcdef";
+          const frames = 28;
+          let i = 0;
+          const scramble = () => {
+            if (i++ >= frames) {
+              hashEl.textContent = FINAL_HASH;
+              return;
+            }
+            let s = "";
+            for (let k = 0; k < FINAL_HASH.length; k++) {
+              s += i > k * (frames / FINAL_HASH.length)
+                ? FINAL_HASH[k]
+                : HEX[Math.floor(Math.random() * 16)];
+            }
+            hashEl.textContent = s;
+            requestAnimationFrame(scramble);
+          };
+          setTimeout(scramble, 600);
+        }
+      }
+    }
+
+    // Copy CTA.
+    const cta = document.querySelector(".ab-cta");
+    const cmdText = document.getElementById("ab-cmd-text");
+    const copyBtn = document.querySelector(".ab-copy-btn");
+    const copy = async () => {
+      if (!cmdText || !copyBtn) return;
+      try {
+        await navigator.clipboard.writeText(cmdText.textContent || "");
+        const orig = copyBtn.textContent;
+        copyBtn.textContent = "copied";
+        copyBtn.classList.add("copied");
+        setTimeout(() => {
+          copyBtn.textContent = orig || "copy";
+          copyBtn.classList.remove("copied");
+        }, 1400);
+      } catch {}
+    };
+    cta?.addEventListener("click", copy);
+    cta?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); copy(); }
+    });
+  </script>
+</BaseLayout>

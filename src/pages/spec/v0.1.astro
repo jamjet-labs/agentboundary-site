@@ -1,0 +1,18 @@
+---
+import SpecLayout from "../../layouts/SpecLayout.astro";
+import { getEntry, render } from "astro:content";
+
+// Astro's glob loader slugifies dots out: v0.1.md → id "v01".
+const entry = await getEntry("spec", "v01");
+if (!entry) {
+  throw new Error("spec/v0.1.md missing — run `node scripts/sync-spec.mjs` before build.");
+}
+const { Content } = await render(entry);
+---
+<SpecLayout
+  title="AgentBoundary v0.1 specification"
+  description="The open spec for proving AI-initiated production actions."
+  ogImage="/og/spec.png"
+>
+  <Content />
+</SpecLayout>

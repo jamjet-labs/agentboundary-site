@@ -1,0 +1,111 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import metaJson from "../content/spec/_meta.json";
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const { title, description, ogImage } = Astro.props;
+const meta = metaJson as { ref: string; source: string; synced_at: string };
+const sourceLink = meta.ref === "local"
+  ? "https://github.com/jamjet-labs/agentboundary"
+  : `https://github.com/jamjet-labs/agentboundary/tree/${meta.ref}`;
+---
+<BaseLayout title={`${title} — AgentBoundary`} description={description} ogImage={ogImage}>
+  <header class="ab-spec-masthead">
+    <a href="/" class="ab-eyebrow">AgentBoundary · v0.1 · open spec</a>
+    <nav class="ab-spec-nav" aria-label="Spec navigation">
+      <a href="/spec/v0.1">Spec</a>
+      <a href="/threat-model">Threat model</a>
+      <a href="/owasp-mapping">OWASP LLM Top 10</a>
+      <a href="https://github.com/jamjet-labs/agentboundary">GitHub ↗</a>
+    </nav>
+  </header>
+  <main class="ab-spec-main">
+    <article class="ab-spec-prose">
+      <slot />
+    </article>
+    <aside class="ab-spec-meta">
+      <p>
+        spec version: <code>v0.1</code> · authoritative source:
+        <a href={sourceLink}>jamjet-labs/agentboundary</a>
+        <span> (ref: <code>{meta.ref}</code>)</span>
+      </p>
+    </aside>
+  </main>
+  <style is:global>
+    .ab-spec-masthead {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--rule);
+      flex-wrap: wrap;
+    }
+    .ab-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .ab-spec-nav {
+      display: flex;
+      gap: 20px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+    }
+    .ab-spec-nav a { color: var(--fg-muted); text-decoration: none; }
+    .ab-spec-nav a:hover { color: var(--fg); }
+
+    .ab-spec-main {
+      max-width: 880px;
+      margin: 48px auto;
+      padding: 0 24px;
+    }
+    .ab-spec-prose h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      margin-top: 0;
+      margin-bottom: 0.5em;
+    }
+    .ab-spec-prose h2 {
+      font-size: 1.6rem;
+      margin-top: 2.4rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--rule);
+    }
+    .ab-spec-prose h3 { font-size: 1.2rem; margin-top: 1.8rem; }
+    .ab-spec-prose p, .ab-spec-prose li { max-width: var(--measure); }
+    .ab-spec-prose table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1.2rem 0;
+      font-size: 0.93em;
+    }
+    .ab-spec-prose th, .ab-spec-prose td {
+      border: 1px solid var(--rule);
+      padding: 8px 12px;
+      vertical-align: top;
+      text-align: left;
+    }
+    .ab-spec-prose th { background: var(--bg-elev); }
+    .ab-spec-prose code { background: var(--bg-elev); padding: 1px 6px; border-radius: 3px; }
+    .ab-spec-prose pre code { background: transparent; padding: 0; }
+    .ab-spec-prose a { color: var(--accent-2); }
+    .ab-spec-prose a.heading-anchor { color: inherit; text-decoration: none; }
+
+    .ab-spec-meta {
+      margin-top: 64px;
+      padding: 16px 0;
+      border-top: 1px solid var(--rule);
+      font-size: 13px;
+      color: var(--fg-muted);
+      font-family: var(--font-mono);
+    }
+  </style>
+</BaseLayout>

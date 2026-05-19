@@ -1,0 +1,61 @@
+---
+import "../styles/tokens.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const {
+  title = "AgentBoundary — Prove every agent action.",
+  description = "An open spec and conformance suite for proving AI-initiated production actions.",
+  ogImage = "/og/index.png",
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site).toString()} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(ogImage, Astro.site).toString()} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <slot name="head" />
+  </head>
+  <body>
+    <slot />
+    <footer class="ab-footer">
+      <p>
+        <strong>AgentBoundary</strong> is an open specification stewarded by
+        <a href="https://jamjet.dev/">JamJet Labs</a>. Apache 2.0. Implementations welcome.
+        Source: <a href="https://github.com/jamjet-labs/agentboundary">github.com/jamjet-labs/agentboundary</a>.
+      </p>
+    </footer>
+    <style is:global>
+      .ab-footer {
+        border-top: 1px solid var(--rule);
+        margin-top: 96px;
+        padding: 32px 24px 48px;
+        font-size: 14px;
+        color: var(--fg-muted);
+        text-align: center;
+      }
+      .ab-footer a { color: var(--fg-muted); }
+    </style>
+  </body>
+</html>
