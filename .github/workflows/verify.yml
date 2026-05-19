@@ -20,14 +20,16 @@ jobs:
         id: specref
         run: |
           # Use the latest published release if one exists, otherwise main.
-          # Falls back gracefully during the pre-launch window when the tag
-          # has not been pushed yet.
-          REF=$(gh api repos/jamjet-labs/agentboundary/releases/latest --jq '.tag_name' 2>/dev/null || echo "")
-          if [ -z "$REF" ] || [ "$REF" = "null" ]; then
-            REF="main"
+          # `gh api` exits 0 even on 404 with a JSON error body, so detect
+          # by HTTP status explicitly.
+          REF="main"
+          STATUS=$(gh api -i repos/jamjet-labs/agentboundary/releases/latest 2>/dev/null \
+            | head -1 | awk '{print $2}' || echo "")
+          if [ "$STATUS" = "200" ]; then
+            REF=$(gh api repos/jamjet-labs/agentboundary/releases/latest --jq '.tag_name')
           fi
           echo "ref=$REF" >> "$GITHUB_OUTPUT"
-          echo "Spec ref resolved to: $REF"
+          echo "Spec ref resolved to: $REF (release-latest status was $STATUS)"
         env:
           GH_TOKEN: ${{ github.token }}
 
