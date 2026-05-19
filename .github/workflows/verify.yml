@@ -16,11 +16,26 @@ jobs:
       - name: Checkout site
         uses: actions/checkout@v4
 
-      - name: Checkout spec at pinned ref
+      - name: Resolve spec ref
+        id: specref
+        run: |
+          # Use the latest published release if one exists, otherwise main.
+          # Falls back gracefully during the pre-launch window when the tag
+          # has not been pushed yet.
+          REF=$(gh api repos/jamjet-labs/agentboundary/releases/latest --jq '.tag_name' 2>/dev/null || echo "")
+          if [ -z "$REF" ] || [ "$REF" = "null" ]; then
+            REF="main"
+          fi
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+          echo "Spec ref resolved to: $REF"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Checkout spec at resolved ref
         uses: actions/checkout@v4
         with:
           repository: jamjet-labs/agentboundary
-          ref: v0.1.0
+          ref: ${{ steps.specref.outputs.ref }}
           path: agentboundary
 
       - name: Move spec sibling
