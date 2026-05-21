@@ -51,8 +51,8 @@ function ensureDir(p) {
   mkdirSync(dirname(p), { recursive: true });
 }
 
-async function fetchOne(remote, dest) {
-  const url = `https://raw.githubusercontent.com/jamjet-labs/agentboundary/${REF}/${remote}`;
+async function fetchOne(remote, dest, ref) {
+  const url = `https://raw.githubusercontent.com/jamjet-labs/agentboundary/${ref}/${remote}`;
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`fetch ${url} -> ${res.status} ${res.statusText}`);
@@ -70,12 +70,20 @@ function copyOne(remote, dest) {
 
 async function sync() {
   const useLocal = !REF && existsSync(LOCAL_SIBLING);
+  // Fall back to fetching "main" when REF is unset AND there's no local
+  // sibling. Production deploys are expected to set AGENTBOUNDARY_REF to
+  // a specific tag (e.g. "v0.1.0", "v0.2.0-alpha.0"); the "main" default
+  // unblocks a deploy that's missing the env var while staying explicit
+  // about the implicit choice in the log.
+  const effectiveRef = useLocal ? null : (REF || "main");
   const mode = useLocal ? "local" : "remote";
-  if (!useLocal && !REF) {
-    console.error("sync-spec: neither local sibling nor AGENTBOUNDARY_REF available");
-    process.exit(2);
-  }
-  console.log(`sync-spec: mode=${mode}${REF ? ` ref=${REF}` : ` source=${LOCAL_SIBLING}`}`);
+  console.log(
+    `sync-spec: mode=${mode}${
+      effectiveRef
+        ? ` ref=${effectiveRef}${REF ? "" : " (defaulted; AGENTBOUNDARY_REF unset)"}`
+        : ` source=${LOCAL_SIBLING}`
+    }`
+  );
 
   const all = [
     ...SPEC_FILES.map((e) => ["spec", ...e]),
@@ -85,7 +93,21 @@ async function sync() {
   for (const [kind, remote, dest, opts] of all) {
     const destAbs = resolve(repoRoot, dest);
     ensureDir(destAbs);
-    let body = useLocal ? copyOne(remote, dest) : await fetchOne(remote, dest);
+    let body;
+    try {
+      body = useLocal ? copyOne(remote, dest) : await fetchOne(remote, dest, effectiveRef);
+    } catch (err) {
+      // Spec files that don't exist at the resolved ref are non-fatal:
+      // older refs (e.g. v0.1.0) don't carry v0.2-alpha.md or v0.2-alpha.json.
+      // We log the miss and move on so the build doesn't break for
+      // forward-compatible additions.
+      const optional = kind === "spec" || kind === "schema";
+      if (optional) {
+        console.warn(`  ${remote} -> SKIP (${err.message})`);
+        continue;
+      }
+      throw err;
+    }
     if (kind === "spec") {
       const fm = `---\ntitle: ${JSON.stringify(opts?.title || "")}\n---\n\n`;
       body = fm + rewriteLinks(body);
@@ -95,8 +117,8 @@ async function sync() {
   }
 
   const meta = {
-    ref: useLocal ? "local" : REF,
-    source: useLocal ? LOCAL_SIBLING : `github:jamjet-labs/agentboundary@${REF}`,
+    ref: useLocal ? "local" : effectiveRef,
+    source: useLocal ? LOCAL_SIBLING : `github:jamjet-labs/agentboundary@${effectiveRef}`,
     synced_at: new Date().toISOString(),
   };
   writeFileSync(resolve(repoRoot, "src/content/spec/_meta.json"), JSON.stringify(meta, null, 2));
