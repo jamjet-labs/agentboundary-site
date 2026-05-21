@@ -3,16 +3,32 @@ import SpecLayout from "../../layouts/SpecLayout.astro";
 import { getEntry, render } from "astro:content";
 
 // Astro's glob loader slugifies dots out: v0.2-alpha.md → id "v02-alpha".
+// The sync-spec script gracefully skips this file when the resolved
+// agentboundary ref doesn't include it (e.g. older release tags), so
+// the entry can be legitimately absent at build time. Render a
+// short stub instead of throwing — Astro static routes have to build,
+// even when the underlying content isn't synced.
 const entry = await getEntry("spec", "v02-alpha");
-if (!entry) {
-  throw new Error("spec/v0.2-alpha.md missing — run `node scripts/sync-spec.mjs` before build.");
+let Content: any = null;
+if (entry) {
+  ({ Content } = await render(entry));
 }
-const { Content } = await render(entry);
 ---
 <SpecLayout
   title="AgentBoundary v0.2-alpha (draft)"
   description="Draft delta over v0.1 — optional provenance, completeness_score, and prior_receipt fields for self-honest emission reporting and singly-linked chain-of-custody."
   ogImage="/og/spec.png"
 >
-  <Content />
+  {Content ? <Content /> : (
+    <div>
+      <h1>AgentBoundary v0.2-alpha</h1>
+      <p>
+        The v0.2-alpha draft is not bundled in the agentboundary ref this
+        microsite was built from. Read the source on GitHub at
+        <a href="https://github.com/jamjet-labs/agentboundary/blob/main/docs/spec/v0.2-alpha.md">
+          jamjet-labs/agentboundary/docs/spec/v0.2-alpha.md
+        </a>.
+      </p>
+    </div>
+  )}
 </SpecLayout>
