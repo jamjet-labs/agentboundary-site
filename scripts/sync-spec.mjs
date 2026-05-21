@@ -22,6 +22,7 @@ const LOCAL_SIBLING = resolve(repoRoot, "..", "agentboundary");
 
 const SPEC_FILES = [
   ["docs/spec/v0.1.md", "src/content/spec/v0.1.md", { title: "AgentBoundary v0.1 Specification" }],
+  ["docs/spec/v0.2-alpha.md", "src/content/spec/v0.2-alpha.md", { title: "AgentBoundary v0.2-alpha (Draft)" }],
   ["docs/spec/threat-model.md", "src/content/spec/threat-model.md", { title: "AgentBoundary Threat Model" }],
   ["docs/spec/owasp-mapping.md", "src/content/spec/owasp-mapping.md", { title: "OWASP LLM Top 10 — AgentBoundary Mapping" }],
 ];
@@ -38,6 +39,7 @@ function rewriteLinks(body) {
 }
 const SCHEMA_FILES = [
   ["docs/schemas/action-receipt-v0.1.json", "public/schemas/action-receipt-v0.1.json"],
+  ["docs/schemas/action-receipt-v0.2-alpha.json", "public/schemas/action-receipt-v0.2-alpha.json"],
 ];
 const RECEIPT_FILES = [
   ["docs/receipts/github-merge.json", "public/receipts/github-merge.json"],
