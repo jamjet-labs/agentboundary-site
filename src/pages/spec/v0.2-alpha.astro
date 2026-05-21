@@ -1,0 +1,18 @@
+---
+import SpecLayout from "../../layouts/SpecLayout.astro";
+import { getEntry, render } from "astro:content";
+
+// Astro's glob loader slugifies dots out: v0.2-alpha.md → id "v02-alpha".
+const entry = await getEntry("spec", "v02-alpha");
+if (!entry) {
+  throw new Error("spec/v0.2-alpha.md missing — run `node scripts/sync-spec.mjs` before build.");
+}
+const { Content } = await render(entry);
+---
+<SpecLayout
+  title="AgentBoundary v0.2-alpha (draft)"
+  description="Draft delta over v0.1 — optional provenance, completeness_score, and prior_receipt fields for self-honest emission reporting and singly-linked chain-of-custody."
+  ogImage="/og/spec.png"
+>
+  <Content />
+</SpecLayout>
