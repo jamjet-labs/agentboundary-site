@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  deployments: write
 
 jobs:
   build:
@@ -83,3 +84,11 @@ jobs:
         run: |
           jq -r '.["$id"]' dist/schemas/action-receipt-v0.1.json | tee /tmp/sid
           grep -q "agentboundary.jamjet.dev" /tmp/sid
+
+      - name: Deploy to Cloudflare Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist/ --project-name=agentboundary-site --branch=main
