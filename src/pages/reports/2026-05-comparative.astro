@@ -1,0 +1,20 @@
+---
+import SpecLayout from "../../layouts/SpecLayout.astro";
+import { getEntry, render } from "astro:content";
+
+// Astro's glob loader slugifies the filename: 2026-05-comparative.md → id "2026-05-comparative".
+const entry = await getEntry("reports", "2026-05-comparative");
+if (!entry) {
+  throw new Error(
+    "reports/2026-05-comparative.md missing from src/content/reports/"
+  );
+}
+const { Content } = await render(entry);
+---
+<SpecLayout
+  title="Cross-vendor conformance report — May 2026"
+  description="40-scenario AgentBoundary v0.1 conformance suite run against Microsoft AGT, Cloudflare HITL, LangSmith Gateway, and Anthropic permission_policy."
+  ogImage="/og/spec.png"
+>
+  <Content />
+</SpecLayout>
